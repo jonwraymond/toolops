@@ -20,7 +20,7 @@ func TestNewRateLimiter(t *testing.T) {
 
 func TestRateLimiter_Allow(t *testing.T) {
 	rl := NewRateLimiter(RateLimiterConfig{
-		Rate:  10,  // 10 per second
+		Rate:  10, // 10 per second
 		Burst: 5,
 	})
 

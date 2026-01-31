@@ -126,7 +126,8 @@ func TestKeyer_KeyFormat(t *testing.T) {
 
 	// Verify hash is valid hex
 	for _, c := range hash {
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+		isLowerHex := (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
+		if !isLowerHex {
 			t.Errorf("Hash should be lowercase hex, got character %q in %q", string(c), hash)
 			break
 		}

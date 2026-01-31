@@ -157,7 +157,9 @@ func TestMiddleware_DoesNotMutateInput(t *testing.T) {
 	}
 
 	wrapped := mw.Wrap(innerFunc)
-	wrapped(context.Background(), meta, originalInput)
+	if _, err := wrapped(context.Background(), meta, originalInput); err != nil {
+		t.Fatalf("wrapped() error = %v", err)
+	}
 
 	// Verify original was not mutated
 	// Note: The middleware doesn't copy the input, but it shouldn't add to it
@@ -192,7 +194,9 @@ func TestMiddleware_PropagatesContext(t *testing.T) {
 
 	wrapped := mw.Wrap(innerFunc)
 	ctx := context.WithValue(context.Background(), testKey, testValue)
-	wrapped(ctx, meta, nil)
+	if _, err := wrapped(ctx, meta, nil); err != nil {
+		t.Fatalf("wrapped() error = %v", err)
+	}
 
 	if receivedValue != testValue {
 		t.Errorf("expected context value %q, got %v", testValue, receivedValue)
@@ -221,7 +225,10 @@ func TestMiddleware_ReturnsOriginalResult(t *testing.T) {
 	}
 
 	wrapped := mw.Wrap(innerFunc)
-	result, _ := wrapped(context.Background(), meta, nil)
+	result, err := wrapped(context.Background(), meta, nil)
+	if err != nil {
+		t.Fatalf("wrapped() error = %v", err)
+	}
 
 	// Verify exact same pointer is returned
 	if result != expectedResult {
@@ -251,7 +258,9 @@ func TestMiddleware_MeasuresDuration(t *testing.T) {
 	}
 
 	wrapped := mw.Wrap(innerFunc)
-	wrapped(context.Background(), meta, nil)
+	if _, err := wrapped(context.Background(), meta, nil); err != nil {
+		t.Fatalf("wrapped() error = %v", err)
+	}
 
 	var rm metricdata.ResourceMetrics
 	if err := metricReader.Collect(context.Background(), &rm); err != nil {

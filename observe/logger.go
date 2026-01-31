@@ -107,22 +107,22 @@ func (l *structuredLogger) WithTool(meta ToolMeta) Logger {
 }
 
 func (l *structuredLogger) Info(ctx context.Context, msg string, fields ...Field) {
-	l.log(ctx, LevelInfo, msg, fields)
+	l.log(LevelInfo, msg, fields)
 }
 
 func (l *structuredLogger) Warn(ctx context.Context, msg string, fields ...Field) {
-	l.log(ctx, LevelWarn, msg, fields)
+	l.log(LevelWarn, msg, fields)
 }
 
 func (l *structuredLogger) Error(ctx context.Context, msg string, fields ...Field) {
-	l.log(ctx, LevelError, msg, fields)
+	l.log(LevelError, msg, fields)
 }
 
 func (l *structuredLogger) Debug(ctx context.Context, msg string, fields ...Field) {
-	l.log(ctx, LevelDebug, msg, fields)
+	l.log(LevelDebug, msg, fields)
 }
 
-func (l *structuredLogger) log(ctx context.Context, level LogLevel, msg string, fields []Field) {
+func (l *structuredLogger) log(level LogLevel, msg string, fields []Field) {
 	// Filter by level
 	if level < l.level {
 		return
@@ -159,8 +159,12 @@ func (l *structuredLogger) log(ctx context.Context, level LogLevel, msg string, 
 		return // Silently drop malformed log entries
 	}
 
-	l.writer.Write(data)
-	l.writer.Write([]byte("\n"))
+	if _, err := l.writer.Write(data); err != nil {
+		return
+	}
+	if _, err := l.writer.Write([]byte("\n")); err != nil {
+		return
+	}
 }
 
 // isRedactedField returns true if the field should be redacted.

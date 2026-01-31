@@ -45,9 +45,9 @@ func ReadinessHandler(agg *Aggregator) http.HandlerFunc {
 
 // HealthResponse is the JSON response for the detailed health endpoint.
 type HealthResponse struct {
-	Status    string                    `json:"status"`
-	Timestamp string                    `json:"timestamp"`
-	Checks    map[string]CheckResponse  `json:"checks,omitempty"`
+	Status    string                   `json:"status"`
+	Timestamp string                   `json:"timestamp"`
+	Checks    map[string]CheckResponse `json:"checks,omitempty"`
 }
 
 // CheckResponse is the JSON response for a single health check.

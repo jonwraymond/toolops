@@ -103,11 +103,12 @@ func TestNewAuthenticatorFunc(t *testing.T) {
 	}
 
 	req := &AuthRequest{}
-	if !auth.Supports(nil, req) {
+	ctx := context.Background()
+	if !auth.Supports(ctx, req) {
 		t.Error("Supports() = false, want true")
 	}
 
-	result, err := auth.Authenticate(nil, req)
+	result, err := auth.Authenticate(ctx, req)
 	if err != nil {
 		t.Errorf("Authenticate() error = %v", err)
 	}

@@ -43,8 +43,12 @@ func TestExporter_StdoutMetrics(t *testing.T) {
 // TestExporter_OtlpMissingEndpoint verifies OTLP without endpoint env fails.
 func TestExporter_OtlpMissingEndpoint(t *testing.T) {
 	// Ensure env var is not set
-	os.Unsetenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	os.Unsetenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT")
+	if err := os.Unsetenv("OTEL_EXPORTER_OTLP_ENDPOINT"); err != nil {
+		t.Fatalf("unset env: %v", err)
+	}
+	if err := os.Unsetenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"); err != nil {
+		t.Fatalf("unset env: %v", err)
+	}
 
 	_, err := NewTracingExporter(context.Background(), "otlp")
 	if err == nil {
@@ -58,8 +62,14 @@ func TestExporter_OtlpMissingEndpoint(t *testing.T) {
 // TestExporter_OtlpWithEndpoint verifies OTLP with endpoint env succeeds.
 func TestExporter_OtlpWithEndpoint(t *testing.T) {
 	// Set endpoint env var
-	os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
-	defer os.Unsetenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if err := os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317"); err != nil {
+		t.Fatalf("set env: %v", err)
+	}
+	defer func() {
+		if err := os.Unsetenv("OTEL_EXPORTER_OTLP_ENDPOINT"); err != nil {
+			t.Fatalf("unset env: %v", err)
+		}
+	}()
 
 	exp, err := NewTracingExporter(context.Background(), "otlp")
 	if err != nil {
@@ -72,7 +82,9 @@ func TestExporter_OtlpWithEndpoint(t *testing.T) {
 
 // TestExporter_JaegerMissingEndpoint verifies Jaeger without endpoint fails.
 func TestExporter_JaegerMissingEndpoint(t *testing.T) {
-	os.Unsetenv("OTEL_EXPORTER_JAEGER_ENDPOINT")
+	if err := os.Unsetenv("OTEL_EXPORTER_JAEGER_ENDPOINT"); err != nil {
+		t.Fatalf("unset env: %v", err)
+	}
 
 	_, err := NewTracingExporter(context.Background(), "jaeger")
 	if err == nil {

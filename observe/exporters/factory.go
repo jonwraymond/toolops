@@ -38,7 +38,7 @@ func NewTracingExporter(ctx context.Context, name string) (sdktrace.SpanExporter
 		// Jaeger now uses OTLP, check for endpoint
 		endpoint := os.Getenv("OTEL_EXPORTER_JAEGER_ENDPOINT")
 		if endpoint == "" {
-			return nil, fmt.Errorf("Jaeger endpoint not configured: set OTEL_EXPORTER_JAEGER_ENDPOINT")
+			return nil, fmt.Errorf("jaeger endpoint not configured: set OTEL_EXPORTER_JAEGER_ENDPOINT")
 		}
 		// Use OTLP exporter for Jaeger (Jaeger supports OTLP natively)
 		return otlptracegrpc.New(ctx)

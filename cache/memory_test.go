@@ -106,7 +106,7 @@ func TestMemoryCache_ConcurrentAccess(t *testing.T) {
 	wg.Add(numGoroutines)
 
 	for i := 0; i < numGoroutines; i++ {
-		go func(id int) {
+		go func() {
 			defer wg.Done()
 			for j := 0; j < opsPerGoroutine; j++ {
 				key := "concurrent-key"
@@ -122,7 +122,7 @@ func TestMemoryCache_ConcurrentAccess(t *testing.T) {
 					_ = cache.Delete(ctx, key)
 				}
 			}
-		}(i)
+		}()
 	}
 
 	wg.Wait()

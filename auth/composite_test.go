@@ -8,12 +8,12 @@ import (
 
 // mockAuthenticator is a test authenticator with configurable behavior.
 type mockAuthenticator struct {
-	name        string
-	supports    bool
-	result      *AuthResult
-	err         error
-	supportsFn  func(ctx context.Context, req *AuthRequest) bool
-	authFn      func(ctx context.Context, req *AuthRequest) (*AuthResult, error)
+	name       string
+	supports   bool
+	result     *AuthResult
+	err        error
+	supportsFn func(ctx context.Context, req *AuthRequest) bool
+	authFn     func(ctx context.Context, req *AuthRequest) (*AuthResult, error)
 }
 
 func (m *mockAuthenticator) Name() string {

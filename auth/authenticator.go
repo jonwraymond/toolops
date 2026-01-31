@@ -5,10 +5,10 @@ import "context"
 // Authenticator validates credentials and returns an identity.
 //
 // Contract:
-// - Concurrency: implementations must be safe for concurrent use.
-// - Context: methods should honor cancellation/deadlines.
-// - Errors: Authenticate returns (nil, error) for internal errors;
-//   returns (AuthResult, nil) for auth failures (check result.Authenticated).
+//   - Concurrency: implementations must be safe for concurrent use.
+//   - Context: methods should honor cancellation/deadlines.
+//   - Errors: Authenticate returns (nil, error) for internal errors;
+//     returns (AuthResult, nil) for auth failures (check result.Authenticated).
 type Authenticator interface {
 	// Name returns a unique identifier for this authenticator.
 	Name() string

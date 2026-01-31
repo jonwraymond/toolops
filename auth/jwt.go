@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -235,8 +234,3 @@ var _ Authenticator = (*JWTAuthenticator)(nil)
 
 // Ensure StaticKeyProvider implements KeyProvider
 var _ KeyProvider = (*StaticKeyProvider)(nil)
-
-// Helper to format errors
-func wrapJWTError(err error) error {
-	return fmt.Errorf("jwt: %w", err)
-}

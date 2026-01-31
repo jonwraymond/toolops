@@ -6,13 +6,13 @@ import "time"
 type AuthMethod string
 
 const (
-	AuthMethodNone       AuthMethod = "none"
-	AuthMethodJWT        AuthMethod = "jwt"
-	AuthMethodAPIKey     AuthMethod = "api_key"
-	AuthMethodOAuth2     AuthMethod = "oauth2"
-	AuthMethodBasic      AuthMethod = "basic"
-	AuthMethodAnonymous  AuthMethod = "anonymous"
-	AuthMethodComposite  AuthMethod = "composite"
+	AuthMethodNone      AuthMethod = "none"
+	AuthMethodJWT       AuthMethod = "jwt"
+	AuthMethodAPIKey    AuthMethod = "api_key"
+	AuthMethodOAuth2    AuthMethod = "oauth2"
+	AuthMethodBasic     AuthMethod = "basic"
+	AuthMethodAnonymous AuthMethod = "anonymous"
+	AuthMethodComposite AuthMethod = "composite"
 )
 
 // Identity represents an authenticated principal.
