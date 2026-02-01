@@ -29,3 +29,5 @@ coverage.html
 # Build
 dist/
 bin/
+
+.claude/
