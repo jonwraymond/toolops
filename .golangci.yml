@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
@@ -19,12 +19,11 @@ formatters:
   enable:
     - gofmt
     - goimports
-
-linters-settings:
-  goimports:
-    local-prefixes: github.com/jonwraymond
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/jonwraymond
 
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0

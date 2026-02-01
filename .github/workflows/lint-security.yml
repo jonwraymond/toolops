@@ -23,9 +23,9 @@ jobs:
           cache: true
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v2.8.0
           args: --timeout=5m
 
   security:
@@ -40,11 +40,14 @@ jobs:
           go-version-file: go.mod
 
       - name: Run gosec
-        uses: securego/gosec@master
-        with:
-          args: -fmt sarif -out gosec.sarif ./...
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.22.11
+          "$(go env GOPATH)/bin/gosec" -fmt sarif -out gosec.sarif ./...
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: gosec.sarif
+
+      - name: Run govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
