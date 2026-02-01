@@ -146,6 +146,7 @@ func (r *Retry) calculateDelay(attempt int) time.Duration {
 	// Add jitter if enabled
 	if r.config.Jitter && delay > 0 {
 		// Add up to 25% jitter
+		// #nosec G404 -- jitter is non-cryptographic timing variance.
 		jitter := time.Duration(rand.Int64N(int64(delay / 4)))
 		delay = delay + jitter
 	}
