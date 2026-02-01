@@ -31,3 +31,5 @@ dist/
 bin/
 
 .claude/
+
+CLAUDE.md
