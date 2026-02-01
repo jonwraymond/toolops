@@ -2,7 +2,7 @@ package observe
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 )
 
@@ -43,8 +43,8 @@ func TestConfigValidate_MissingServiceName(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for missing service name, got nil")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "service name") {
-		t.Errorf("expected error to contain 'service name', got: %v", err)
+	if !errors.Is(err, ErrMissingServiceName) {
+		t.Errorf("expected ErrMissingServiceName, got: %v", err)
 	}
 }
 
@@ -62,8 +62,8 @@ func TestConfigValidate_UnknownTracingExporter(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for unknown tracing exporter, got nil")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "unknown tracing exporter") {
-		t.Errorf("expected error to contain 'unknown tracing exporter', got: %v", err)
+	if !errors.Is(err, ErrInvalidTracingExporter) {
+		t.Errorf("expected ErrInvalidTracingExporter, got: %v", err)
 	}
 }
 
@@ -81,8 +81,8 @@ func TestConfigValidate_UnknownMetricsExporter(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for unknown metrics exporter, got nil")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "unknown metrics exporter") {
-		t.Errorf("expected error to contain 'unknown metrics exporter', got: %v", err)
+	if !errors.Is(err, ErrInvalidMetricsExporter) {
+		t.Errorf("expected ErrInvalidMetricsExporter, got: %v", err)
 	}
 }
 
@@ -101,8 +101,8 @@ func TestConfigValidate_SamplePctOutOfRange(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for sample percentage out of range, got nil")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "sample percentage") {
-		t.Errorf("expected error to contain 'sample percentage', got: %v", err)
+	if !errors.Is(err, ErrInvalidSamplePct) {
+		t.Errorf("expected ErrInvalidSamplePct, got: %v", err)
 	}
 }
 
@@ -121,8 +121,8 @@ func TestConfigValidate_SamplePctNegative(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for negative sample percentage, got nil")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "sample percentage") {
-		t.Errorf("expected error to contain 'sample percentage', got: %v", err)
+	if !errors.Is(err, ErrInvalidSamplePct) {
+		t.Errorf("expected ErrInvalidSamplePct, got: %v", err)
 	}
 }
 
@@ -140,8 +140,8 @@ func TestConfigValidate_UnknownLogLevel(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for unknown log level, got nil")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "unknown log level") {
-		t.Errorf("expected error to contain 'unknown log level', got: %v", err)
+	if !errors.Is(err, ErrInvalidLogLevel) {
+		t.Errorf("expected ErrInvalidLogLevel, got: %v", err)
 	}
 }
 

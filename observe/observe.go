@@ -74,29 +74,35 @@ var validLogLevels = map[string]bool{
 }
 
 // Validate validates the configuration.
+// Returns sentinel errors that can be checked with errors.Is:
+//   - ErrMissingServiceName: ServiceName is empty
+//   - ErrInvalidTracingExporter: Unknown tracing exporter
+//   - ErrInvalidSamplePct: SamplePct not in [0.0, 1.0]
+//   - ErrInvalidMetricsExporter: Unknown metrics exporter
+//   - ErrInvalidLogLevel: Unknown log level
 func (c *Config) Validate() error {
 	if c.ServiceName == "" {
-		return errors.New("service name is required")
+		return ErrMissingServiceName
 	}
 
 	if c.Tracing.Enabled {
 		if !validTracingExporters[c.Tracing.Exporter] {
-			return fmt.Errorf("unknown tracing exporter: %q", c.Tracing.Exporter)
+			return fmt.Errorf("%w: %q", ErrInvalidTracingExporter, c.Tracing.Exporter)
 		}
-		if c.Tracing.SamplePct < 0 || c.Tracing.SamplePct > 1.0 {
-			return fmt.Errorf("sample percentage must be between 0.0 and 1.0, got: %f", c.Tracing.SamplePct)
+		if c.Tracing.SamplePct < MinSamplePct || c.Tracing.SamplePct > MaxSamplePct {
+			return fmt.Errorf("%w: got %f", ErrInvalidSamplePct, c.Tracing.SamplePct)
 		}
 	}
 
 	if c.Metrics.Enabled {
 		if !validMetricsExporters[c.Metrics.Exporter] {
-			return fmt.Errorf("unknown metrics exporter: %q", c.Metrics.Exporter)
+			return fmt.Errorf("%w: %q", ErrInvalidMetricsExporter, c.Metrics.Exporter)
 		}
 	}
 
 	if c.Logging.Enabled {
 		if !validLogLevels[c.Logging.Level] {
-			return fmt.Errorf("unknown log level: %q", c.Logging.Level)
+			return fmt.Errorf("%w: %q", ErrInvalidLogLevel, c.Logging.Level)
 		}
 	}
 
@@ -106,34 +112,44 @@ func (c *Config) Validate() error {
 // Observer provides access to telemetry primitives.
 //
 // Contract:
-// - Concurrency: implementations must be safe for concurrent use.
-// - Context: Shutdown must honor cancellation/deadlines.
-// - Errors: Shutdown should be idempotent and return the first error encountered.
+//   - Concurrency: All methods are safe for concurrent use after construction.
+//   - Context: Shutdown honors context cancellation/deadlines.
+//   - Errors: Shutdown aggregates errors from subsystem shutdowns using errors.Join.
+//   - Ownership: Returned Tracer, Meter, Logger are shared; do not close individually.
+//   - Lifecycle: Shutdown is idempotent; subsequent calls are safe.
 type Observer interface {
-	// Tracer returns the configured tracer.
+	// Tracer returns the configured OpenTelemetry tracer.
 	Tracer() trace.Tracer
 
-	// Meter returns the configured meter.
+	// Meter returns the configured OpenTelemetry meter.
 	Meter() metric.Meter
 
-	// Logger returns the configured logger.
+	// Logger returns the configured structured logger.
 	Logger() Logger
 
 	// Shutdown gracefully shuts down all telemetry providers.
+	// Returns aggregated errors from all subsystems.
 	Shutdown(ctx context.Context) error
 }
 
 // Logger is a minimal structured logging interface.
 //
 // Contract:
-// - Concurrency: implementations must be safe for concurrent use.
-// - Context: methods should honor cancellation/deadlines where applicable.
-// - Errors: logging must be best-effort and must not panic.
+//   - Concurrency: All methods are safe for concurrent use.
+//   - Context: Methods accept context for future extensibility (tracing correlation).
+//   - Errors: Logging is best-effort and must not panic on failures.
+//   - Ownership: WithTool returns a new Logger; original remains unchanged.
+//   - Redaction: Sensitive fields (see RedactedFields) are automatically redacted.
 type Logger interface {
+	// Info logs an informational message.
 	Info(ctx context.Context, msg string, fields ...Field)
+	// Warn logs a warning message.
 	Warn(ctx context.Context, msg string, fields ...Field)
+	// Error logs an error message.
 	Error(ctx context.Context, msg string, fields ...Field)
+	// Debug logs a debug message (filtered by log level).
 	Debug(ctx context.Context, msg string, fields ...Field)
+	// WithTool returns a new Logger with tool context attached.
 	WithTool(meta ToolMeta) Logger
 }
 

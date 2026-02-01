@@ -6,9 +6,16 @@ import (
 )
 
 // ExecuteFunc is the signature for tool execution functions.
+// This is the standard function signature that Middleware wraps.
 type ExecuteFunc func(ctx context.Context, tool ToolMeta, input any) (any, error)
 
-// Middleware wraps tool execution with observability.
+// Middleware wraps tool execution with observability (tracing, metrics, logging).
+//
+// Contract:
+//   - Concurrency: Wrap() returns a thread-safe ExecuteFunc.
+//   - Context: Propagates context through tracing spans.
+//   - Errors: Errors from wrapped function are recorded and propagated unchanged.
+//   - Ownership: Input/output values are passed through without modification.
 type Middleware struct {
 	tracer  Tracer
 	metrics Metrics

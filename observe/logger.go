@@ -185,8 +185,9 @@ func isRedactedField(key string) bool {
 // ExtendedLogger extends Logger with WithTool for creating tool-scoped loggers.
 //
 // Contract:
-// - Concurrency: implementations must be safe for concurrent use.
-// - Ownership: WithTool returns a logger bound to ToolMeta; returned logger may share state.
+//   - Concurrency: All methods are safe for concurrent use.
+//   - Ownership: WithTool returns a new Logger with tool context; original unchanged.
+//   - Redaction: All loggers from same root share redaction rules.
 type ExtendedLogger interface {
 	Logger
 	WithTool(meta ToolMeta) Logger

@@ -11,11 +11,18 @@ import (
 // Metrics records execution metrics for tools.
 //
 // Contract:
-// - Concurrency: implementations must be safe for concurrent use.
-// - Context: must honor cancellation/deadlines and return quickly.
-// - Errors: implementations must not panic.
+//   - Concurrency: All methods are safe for concurrent use.
+//   - Context: Honors context for metric attribute propagation.
+//   - Errors: Must not panic; silently drops metrics on failure.
+//   - Determinism: Same inputs produce consistent metric labels.
+//
+// Metrics recorded:
+//   - tool.exec.total (counter): Total executions
+//   - tool.exec.errors (counter): Total errors
+//   - tool.exec.duration_ms (histogram): Duration in milliseconds
 type Metrics interface {
 	// RecordExecution records a tool execution with duration and error status.
+	// Increments total counter, error counter (if err != nil), and records duration.
 	RecordExecution(ctx context.Context, meta ToolMeta, duration time.Duration, err error)
 }
 

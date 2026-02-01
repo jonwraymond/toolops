@@ -2,8 +2,8 @@ package exporters
 
 import (
 	"context"
+	"errors"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -13,8 +13,8 @@ func TestExporter_InvalidName(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for invalid exporter name")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "unknown exporter") {
-		t.Errorf("expected error to contain 'unknown exporter', got: %v", err)
+	if !errors.Is(err, ErrInvalidExporter) {
+		t.Errorf("expected ErrInvalidExporter, got: %v", err)
 	}
 }
 
@@ -54,8 +54,8 @@ func TestExporter_OtlpMissingEndpoint(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error when OTLP endpoint not configured")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "endpoint") {
-		t.Errorf("expected error to contain 'endpoint', got: %v", err)
+	if !errors.Is(err, ErrEndpointNotConfigured) {
+		t.Errorf("expected ErrEndpointNotConfigured, got: %v", err)
 	}
 }
 
@@ -90,8 +90,8 @@ func TestExporter_JaegerMissingEndpoint(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error when Jaeger endpoint not configured")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "endpoint") {
-		t.Errorf("expected error to contain 'endpoint', got: %v", err)
+	if !errors.Is(err, ErrEndpointNotConfigured) {
+		t.Errorf("expected ErrEndpointNotConfigured, got: %v", err)
 	}
 }
 
@@ -133,7 +133,25 @@ func TestExporter_MetricsInvalidName(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for invalid metrics exporter name")
 	}
-	if !strings.Contains(strings.ToLower(err.Error()), "unknown") {
-		t.Errorf("expected error to contain 'unknown', got: %v", err)
+	if !errors.Is(err, ErrInvalidExporter) {
+		t.Errorf("expected ErrInvalidExporter, got: %v", err)
+	}
+}
+
+// TestExporter_OtlpMetricsMissingEndpoint verifies OTLP metrics without endpoint fails.
+func TestExporter_OtlpMetricsMissingEndpoint(t *testing.T) {
+	if err := os.Unsetenv("OTEL_EXPORTER_OTLP_ENDPOINT"); err != nil {
+		t.Fatalf("unset env: %v", err)
+	}
+	if err := os.Unsetenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"); err != nil {
+		t.Fatalf("unset env: %v", err)
+	}
+
+	_, err := NewMetricsReader(context.Background(), "otlp")
+	if err == nil {
+		t.Fatal("expected error when OTLP metrics endpoint not configured")
+	}
+	if !errors.Is(err, ErrEndpointNotConfigured) {
+		t.Errorf("expected ErrEndpointNotConfigured, got: %v", err)
 	}
 }

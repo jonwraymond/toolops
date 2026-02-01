@@ -3,6 +3,7 @@ package exporters
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -16,8 +17,25 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
+// Errors for exporter configuration.
+var (
+	// ErrEndpointNotConfigured indicates a required endpoint environment variable is not set.
+	ErrEndpointNotConfigured = errors.New("exporters: endpoint not configured")
+
+	// ErrInvalidExporter indicates an unknown exporter name.
+	ErrInvalidExporter = errors.New("exporters: invalid exporter")
+)
+
 // NewTracingExporter creates a trace span exporter based on the exporter name.
-// Supported exporters: stdout, otlp, jaeger, none
+//
+// Supported exporters:
+//   - "stdout": Writes traces to stdout (for development)
+//   - "otlp": OTLP gRPC exporter (requires OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_TRACES_ENDPOINT)
+//   - "jaeger": Jaeger via OTLP (requires OTEL_EXPORTER_JAEGER_ENDPOINT)
+//   - "none" or "": No-op exporter (discards traces)
+//
+// Returns ErrEndpointNotConfigured if OTLP/Jaeger endpoint is not set.
+// Returns ErrInvalidExporter for unknown exporter names.
 func NewTracingExporter(ctx context.Context, name string) (sdktrace.SpanExporter, error) {
 	switch name {
 	case "stdout":
@@ -30,7 +48,7 @@ func NewTracingExporter(ctx context.Context, name string) (sdktrace.SpanExporter
 			endpoint = os.Getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT")
 		}
 		if endpoint == "" {
-			return nil, fmt.Errorf("OTLP endpoint not configured: set OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_TRACES_ENDPOINT")
+			return nil, fmt.Errorf("%w: set OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", ErrEndpointNotConfigured)
 		}
 		return otlptracegrpc.New(ctx)
 
@@ -38,7 +56,7 @@ func NewTracingExporter(ctx context.Context, name string) (sdktrace.SpanExporter
 		// Jaeger now uses OTLP, check for endpoint
 		endpoint := os.Getenv("OTEL_EXPORTER_JAEGER_ENDPOINT")
 		if endpoint == "" {
-			return nil, fmt.Errorf("jaeger endpoint not configured: set OTEL_EXPORTER_JAEGER_ENDPOINT")
+			return nil, fmt.Errorf("%w: set OTEL_EXPORTER_JAEGER_ENDPOINT", ErrEndpointNotConfigured)
 		}
 		// Use OTLP exporter for Jaeger (Jaeger supports OTLP natively)
 		return otlptracegrpc.New(ctx)
@@ -48,12 +66,20 @@ func NewTracingExporter(ctx context.Context, name string) (sdktrace.SpanExporter
 		return stdouttrace.New(stdouttrace.WithWriter(io.Discard))
 
 	default:
-		return nil, fmt.Errorf("unknown exporter: %q", name)
+		return nil, fmt.Errorf("%w: %q", ErrInvalidExporter, name)
 	}
 }
 
 // NewMetricsReader creates a metrics reader based on the exporter name.
-// Supported exporters: stdout, otlp, prometheus, none
+//
+// Supported exporters:
+//   - "stdout": Writes metrics to stdout (for development)
+//   - "otlp": OTLP gRPC exporter (requires OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_METRICS_ENDPOINT)
+//   - "prometheus": Prometheus scrape endpoint
+//   - "none" or "": No-op reader (discards metrics)
+//
+// Returns ErrEndpointNotConfigured if OTLP endpoint is not set.
+// Returns ErrInvalidExporter for unknown exporter names.
 func NewMetricsReader(ctx context.Context, name string) (sdkmetric.Reader, error) {
 	switch name {
 	case "stdout":
@@ -69,7 +95,7 @@ func NewMetricsReader(ctx context.Context, name string) (sdkmetric.Reader, error
 			endpoint = os.Getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT")
 		}
 		if endpoint == "" {
-			return nil, fmt.Errorf("OTLP metrics endpoint not configured: set OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_METRICS_ENDPOINT")
+			return nil, fmt.Errorf("%w: set OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", ErrEndpointNotConfigured)
 		}
 		exp, err := otlpmetricgrpc.New(ctx)
 		if err != nil {
@@ -93,6 +119,6 @@ func NewMetricsReader(ctx context.Context, name string) (sdkmetric.Reader, error
 		return sdkmetric.NewPeriodicReader(exp), nil
 
 	default:
-		return nil, fmt.Errorf("unknown metrics exporter: %q", name)
+		return nil, fmt.Errorf("%w: %q", ErrInvalidExporter, name)
 	}
 }

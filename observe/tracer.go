@@ -40,17 +40,29 @@ func (m ToolMeta) ToolID() string {
 	return m.Name
 }
 
+// Validate checks that required fields are present.
+// Returns ErrMissingToolName if Name is empty.
+func (m ToolMeta) Validate() error {
+	if m.Name == "" {
+		return ErrMissingToolName
+	}
+	return nil
+}
+
 // Tracer wraps OpenTelemetry tracing with tool-specific span management.
 //
 // Contract:
-// - Concurrency: implementations must be safe for concurrent use.
-// - Context: StartSpan must honor cancellation/deadlines and return ctx.Err() when canceled.
-// - Errors: EndSpan must be best-effort and must not panic.
+//   - Concurrency: All methods are safe for concurrent use.
+//   - Context: StartSpan propagates context for parent-child span relationships.
+//   - Errors: EndSpan records error status if err != nil; must not panic.
+//   - Ownership: Returned span must be ended by caller via EndSpan.
+//   - Determinism: Span names follow format "tool.exec.<namespace>.<name>".
 type Tracer interface {
-	// StartSpan starts a new span for tool execution.
+	// StartSpan starts a new span for tool execution with metadata as attributes.
+	// Returns the child context and span. Caller must call EndSpan when done.
 	StartSpan(ctx context.Context, meta ToolMeta) (context.Context, trace.Span)
 
-	// EndSpan ends the span, recording any error.
+	// EndSpan ends the span, recording error status if err != nil.
 	EndSpan(span trace.Span, err error)
 }
 
