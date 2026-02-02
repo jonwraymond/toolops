@@ -147,7 +147,9 @@ func BenchmarkMetrics_RecordExecution(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to create observer: %v", err)
 	}
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	metrics, err := newMetrics(obs.Meter())
 	if err != nil {
@@ -173,7 +175,9 @@ func BenchmarkMetrics_RecordExecution_WithError(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to create observer: %v", err)
 	}
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	metrics, err := newMetrics(obs.Meter())
 	if err != nil {
@@ -202,7 +206,9 @@ func BenchmarkMiddleware_Wrap(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to create observer: %v", err)
 	}
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	mw, err := MiddlewareFromObserver(obs)
 	if err != nil {
@@ -233,7 +239,9 @@ func BenchmarkMiddleware_Wrap_WithLogging(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to create observer: %v", err)
 	}
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	// Replace logger with discard writer
 	obsImpl := obs.(*observer)
@@ -283,7 +291,9 @@ func BenchmarkConcurrent_Middleware(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to create observer: %v", err)
 	}
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	mw, err := MiddlewareFromObserver(obs)
 	if err != nil {

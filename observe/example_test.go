@@ -24,7 +24,9 @@ func ExampleNewObserver() {
 		fmt.Println("Error:", err)
 		return
 	}
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	fmt.Println("Observer created successfully")
 	// Output:
@@ -194,7 +196,9 @@ func ExampleMiddleware_Wrap() {
 		Logging:     observe.LoggingConfig{Enabled: false},
 	}
 	obs, _ := observe.NewObserver(ctx, cfg)
-	defer obs.Shutdown(ctx)
+	defer func() {
+		_ = obs.Shutdown(ctx)
+	}()
 
 	// Create middleware
 	mw, _ := observe.MiddlewareFromObserver(obs)
