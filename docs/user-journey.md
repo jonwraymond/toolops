@@ -132,3 +132,4 @@ _ = executor.Execute(context.Background(), func(ctx context.Context) error {
 
 - Combine `observe` + `cache` + `resilience` in a middleware chain.
 - Use `auth` + `health` to harden MCP endpoints.
+- Review the [Examples](examples.md) page for runnable snippets.

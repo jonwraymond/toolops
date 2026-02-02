@@ -4,16 +4,34 @@ import "context"
 
 // Authenticator validates credentials and returns an identity.
 //
-// Contract:
-//   - Concurrency: implementations must be safe for concurrent use.
-//   - Context: methods should honor cancellation/deadlines.
-//   - Errors: Authenticate returns (nil, error) for internal errors;
-//     returns (AuthResult, nil) for auth failures (check result.Authenticated).
+// # Contract
+//
+// Concurrency:
+//   - Implementations must be safe for concurrent use from multiple goroutines.
+//   - Internal state (if any) must be protected by appropriate synchronization.
+//
+// Context:
+//   - All methods accepting context.Context must honor cancellation and deadlines.
+//   - Long-running operations (e.g., remote token introspection) should check ctx.Done().
+//
+// Errors:
+//   - Authenticate returns (nil, error) ONLY for internal/infrastructure errors
+//     (e.g., network failure, database unavailable).
+//   - Authentication failures (invalid token, expired, etc.) return (*AuthResult, nil)
+//     with result.Authenticated=false and result.Error set to the auth error.
+//   - Use sentinel errors from this package for auth failures: [ErrInvalidCredentials],
+//     [ErrTokenExpired], [ErrTokenMalformed], [ErrMissingCredentials].
+//
+// Ownership:
+//   - The caller owns the AuthRequest; implementations must not modify it.
+//   - The returned AuthResult is owned by the caller.
 type Authenticator interface {
 	// Name returns a unique identifier for this authenticator.
+	// Must be constant for the lifetime of the authenticator.
 	Name() string
 
 	// Supports returns true if this authenticator can handle the request.
+	// Should be a fast check (e.g., header presence) without network calls.
 	Supports(ctx context.Context, req *AuthRequest) bool
 
 	// Authenticate validates credentials and returns a result.

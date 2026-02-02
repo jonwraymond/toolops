@@ -19,6 +19,13 @@ and resilience patterns for production deployments.
 go get github.com/jonwraymond/toolops@latest
 ```
 
+## Documentation Map
+
+- [Architecture](architecture.md)
+- [Schemas and Contracts](schemas.md)
+- [Examples](examples.md)
+- [Design Notes](design-notes.md)
+
 ## Quick Start: Observability
 
 ```go

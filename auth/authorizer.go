@@ -7,12 +7,33 @@ import (
 )
 
 // Authorizer determines if an identity is allowed to perform an action.
+//
+// # Contract
+//
+// Concurrency:
+//   - Implementations must be safe for concurrent use from multiple goroutines.
+//   - Policy state (roles, permissions) should be immutable after construction
+//     or protected by appropriate synchronization.
+//
+// Context:
+//   - Authorize should honor context cancellation for external policy lookups.
+//   - For in-memory policies, context is typically unused but must be accepted.
+//
+// Errors:
+//   - Returns nil if the request is authorized.
+//   - Returns *[AuthzError] (which Is [ErrForbidden]) if access is denied.
+//   - Returns other errors only for internal failures (policy unavailable, etc.).
+//
+// Ownership:
+//   - The caller owns the AuthzRequest; implementations must not modify it.
+//   - The AuthzRequest.Subject identity is read-only.
 type Authorizer interface {
 	// Authorize checks if the request is permitted.
 	// Returns nil if authorized, or an error (typically *AuthzError) if denied.
 	Authorize(ctx context.Context, req *AuthzRequest) error
 
 	// Name returns a unique identifier for this authorizer.
+	// Must be constant for the lifetime of the authorizer.
 	Name() string
 }
 
