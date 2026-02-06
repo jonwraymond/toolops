@@ -29,7 +29,7 @@ func ExampleNewAPIKeyAuthenticator() {
 	store := auth.NewMemoryAPIKeyStore()
 
 	// Add an API key
-	keyHash := auth.HashAPIKey("sk_live_abc123")
+	keyHash := auth.HashAPIKey("example-key-abc123")
 	_ = store.Add(&auth.APIKeyInfo{
 		ID:        "key-1",
 		KeyHash:   keyHash,
@@ -49,7 +49,7 @@ func ExampleNewAPIKeyAuthenticator() {
 	ctx := context.Background()
 	req := &auth.AuthRequest{
 		Headers: map[string][]string{
-			"X-API-Key": {"sk_live_abc123"},
+			"X-API-Key": {"example-key-abc123"},
 		},
 	}
 
@@ -66,11 +66,11 @@ func ExampleNewAPIKeyAuthenticator() {
 
 func ExampleHashAPIKey() {
 	// Hash an API key for storage
-	apiKey := "sk_live_abc123"
-	hash := auth.HashAPIKey(apiKey)
+	value := "example-value-abc123"
+	hash := auth.HashAPIKey(value)
 
 	// Hash is deterministic
-	hash2 := auth.HashAPIKey(apiKey)
+	hash2 := auth.HashAPIKey(value)
 
 	fmt.Println("Hashes match:", hash == hash2)
 	fmt.Println("Hash length:", len(hash)) // SHA-256 = 64 hex chars
