@@ -1,6 +1,6 @@
 module github.com/jonwraymond/toolops
 
-go 1.25.6
+go 1.25.7
 
 require (
 	// observe dependencies
