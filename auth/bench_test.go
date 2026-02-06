@@ -52,11 +52,11 @@ func BenchmarkAPIKeyAuthenticator_Supports(b *testing.B) {
 
 // BenchmarkHashAPIKey measures key hashing.
 func BenchmarkHashAPIKey(b *testing.B) {
-	key := "sk_live_test_api_key_12345"
+	value := "example-key-test-12345"
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = HashAPIKey(key)
+		_ = HashAPIKey(value)
 	}
 }
 
